@@ -4,7 +4,7 @@
 \red252\green9\blue7;}
 {\*\expandedcolortbl;;\cssrgb\c0\c1\c1;\cssrgb\c54133\c87606\c27652;\cssrgb\c100000\c100000\c0;
 \cssrgb\c100000\c15764\c0;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww37900\viewh21300\viewkind0
+\paperw11900\paperh16840\margl1440\margr1440\vieww38200\viewh21600\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
 \f0\b\fs62 \cf2 SQL Practice Questions:
@@ -76,4 +76,89 @@ COUNT(*) FILTER (WHERE device_type IN ('phone', 'tablet')) AS mobile_views\
 FROM viewership;\
 \
 \
-6. }
+\cf3 6. Given a table of Facebook posts, for each user who posted at least twice in 2021, write a query to find the number of days between each user\'92s first post of the year and last post of the year in the year 2021. Output the user and number of the days between each user's first and last post.\
+\cf4 \
+First, we can use the MIN() and MAX() aggregate functions on the post_date column to retrieve the earliest and latest post dates, and substract one from another accordingly.\
+\
+To calculate the difference for each user, we GROUP the results by user_id, and then filter for posts made in the year 2021. To do so, we use the DATE_PART() function to extract the year from the post_date column.\
+\
+In the final step, to exclude users who have posted only once during the year, we apply the HAVING clause with a COUNT() condition greater than 1.\
+\
+SELECT user_id, MAX(post_date::DATE) - MIN(post_date::DATE) AS days_between\
+FROM posts\
+WHERE DATE_PART('year', post_date::DATE) = '2021'\
+GROUP BY user_id\
+HAVING COUNT(post_id) >1;\
+\
+\cf3 \
+7. Write a query to identify the top 2 Power Users who sent the highest number of messages on Microsoft Teams in August 2022. Display the IDs of these 2 users along with the total number of messages they sent. Output the results in descending order based on the count of the messages.\
+\cf4 \
+SELECT sender_id, COUNT(message_id) AS message_count\
+FROM messages\
+WHERE EXTRACT(MONTH FROM sent_date) = '8'\
+AND EXTRACT(YEAR FROM sent_date) = '2022'\
+GROUP BY sender_id\
+ORDER BY message_count DESC\
+LIMIT 2;\
+\
+\
+\cf3 8. Assume you're given a table containing job postings from various companies on the LinkedIn platform. Write a query to retrieve the count of companies that have posted duplicate job listings.\
+\cf4 \
+Definition:\
+\
+Duplicate job listings are defined as two job listings within the same company that share identical titles and descriptions.\
+\
+WITH job_count_cte AS (\
+\
+SELECT company_id, title, description, count(job_id) AS job_count\
+FROM job_listings\
+GROUP BY company_id, title,description\
+\
+)\
+\
+SELECT count(DISTINCT(company_id)) \
+FROM job_count_cte\
+WHERE job_count >1;\
+\
+\
+\cf3 9. Assume you're given the tables containing completed trade orders and user details in a Robinhood trading system.\
+\cf4 \
+Write a query to retrieve the top three cities that have the highest number of completed trade orders listed in descending order. Output the city name and the corresponding number of completed trade orders.\
+\
+SELECT users.city, COUNT(trades.order_id) AS total_orders  \
+FROM trades\
+INNER JOIN users\
+ON users.user_id = trades.user_id\
+WHERE trades.status = 'Completed'\
+GROUP BY users.city\
+ORDER BY total_orders DESC\
+LIMIT 3;\
+\
+\
+\cf3 10. Given the reviews table, write a query to retrieve the average star rating for each product, grouped by month. The output should display the month as a numerical value, product ID, and average star rating rounded to two decimal places. Sort the output first by month and then by product ID.\
+\cf4 \
+SELECT EXTRACT(MONTH FROM submit_date) AS mth,\
+product_id, \
+ROUND(AVG(stars), 2) AS avg_stars\
+FROM reviews\
+GROUP BY mth, product_id\
+ORDER BY mth, product_id;\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+}
